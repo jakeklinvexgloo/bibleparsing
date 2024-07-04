@@ -1,6 +1,5 @@
-/* src/Bible.css */
 .container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -46,7 +45,11 @@
     background-color: #0056b3;
   }
   
-  .parsed-container {
+  .parsed-container,
+  .verses-container,
+  .chapters-container,
+  .books-container,
+  .count-section {
     background: #fff;
     border-radius: 10px;
     padding: 15px;
@@ -54,37 +57,56 @@
     margin-bottom: 20px;
   }
   
-  .parsed-container h2 {
+  .parsed-container h2,
+  .verses-container h2,
+  .chapters-container h2,
+  .books-container h2,
+  .count-section h2 {
     margin-top: 0;
   }
   
-  .parsed-container ul {
+  .parsed-container ul,
+  .verses-container ul,
+  .chapters-container ul,
+  .books-container ul,
+  .count-section ul {
     list-style-type: none;
     padding-left: 0;
   }
   
-  .parsed-container li {
+  .parsed-container li,
+  .verses-container li,
+  .chapters-container li,
+  .books-container li,
+  .count-section li {
     margin: 5px 0;
     font-size: 16px;
     line-height: 1.5;
   }
   
-  .verses-container {
-    background: #fff;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  .count-section {
+    border: 1px solid #ccc;
   }
   
-  .verses-container h2 {
-    margin-top: 0;
+  .count-list {
+    display: flex;
+    justify-content: space-between;
   }
   
-  .verse {
-    margin: 10px 0;
-    font-size: 18px;
-    line-height: 1.5;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+  .count-item {
+    flex: 1;
+    padding: 10px;
+  }
+  
+  .count-item h3 {
+    margin-bottom: 5px;
+  }
+  
+  .count-item ul {
+    padding-left: 20px;
+  }
+  
+  .count-item ul li {
+    margin-bottom: 5px;
   }
   
