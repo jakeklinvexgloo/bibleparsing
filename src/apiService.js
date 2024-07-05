@@ -60,10 +60,8 @@ export const cleanResponse = (responses) => {
     .map(item => item.split(';').join('/')) // Replacing ";" with "/" unless between numbers
     .map(item => {
       const words = item.split(/(\d+)/).filter(Boolean);
-      return words.map(word => abbreviationMap.get(word.trim()) || word).join(' ').replace(/\s*:\s*/g, ':').replace(/\s*-\s*/g, '-');
+      return words.map(word => abbreviationMap.get(word.trim()) || word).join(' ').replace(/\s*:\s*/g, ':');
     })
     .filter(item => validBooks.some(book => item.includes(book)))
-    .map(item => item.replace(/(\w+)\s+(\d+):(\d+)/g, '$1 $2:$3'))
     .join(' / ');
 };
-
