@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getBooks, getVerses, getBookId, askQuestion } from './apiService';
+import { getBooks, getVerses, getBookId, askQuestion, cleanResponse } from './apiService';
 import './Bible.css';
 
 const Bible = () => {
@@ -11,6 +11,7 @@ const Bible = () => {
   const [verseCounts, setVerseCounts] = useState({});
   const [question, setQuestion] = useState('');
   const [apiResponseString, setApiResponseString] = useState('');
+  const [cleanedApiResponseString, setCleanedApiResponseString] = useState('');
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
@@ -53,6 +54,11 @@ const Bible = () => {
       const concatenatedString = [...biblereferences, ...bibleverses, ...biblicalconcepts].join(', ');
       console.log('Concatenated String:', concatenatedString);
       setApiResponseString(concatenatedString);
+
+      // Clean the concatenated string
+      const cleanedString = cleanResponse(concatenatedString.split(', '));
+      console.log('Cleaned Concatenated String:', cleanedString);
+      setCleanedApiResponseString(cleanedString);
     } catch (error) {
       console.error('Error fetching question data:', error);
     }
@@ -192,6 +198,10 @@ const Bible = () => {
       <div className="api-response-container">
         <h2>API Response:</h2>
         <p>{apiResponseString}</p>
+      </div>
+      <div className="cleaned-response-container">
+        <h2>Cleaned API Response:</h2>
+        <p>{cleanedApiResponseString}</p>
       </div>
     </div>
   );

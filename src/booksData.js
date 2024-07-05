@@ -67,3 +67,9 @@ export const books = [
     { name: 'Revelation', id: 'revelation', chapters: 22, abbreviations: ['Rev.', 'Re', 'Revelation'] },
   ];
   
+  export const abbreviationsToFullName = {};
+books.forEach(book => {
+  book.abbreviations.forEach(abbreviation => {
+    abbreviationsToFullName[abbreviation.toLowerCase()] = book.name;
+  });
+});
