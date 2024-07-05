@@ -1,6 +1,5 @@
-// src/Bible.js
 import React, { useState } from 'react';
-import { getBooks, getVerses, getBookId } from './apiService';
+import { getBooks, getVerses, getBookId, askQuestion } from './apiService';
 import './Bible.css';
 
 const Bible = () => {
@@ -9,13 +8,57 @@ const Bible = () => {
   const [books, setBooks] = useState([]);
   const [parsedInput, setParsedInput] = useState([]);
   const [inputValue, setInputValue] = useState('Ephesians 6:4/ 1 Peter 3:1-4/ Genesis 1:27/ 1 Corinthians 7/ Matthew 24/ Matthew');
+  const [verseCounts, setVerseCounts] = useState({});
+  const [question, setQuestion] = useState('');
+  const [apiResponseString, setApiResponseString] = useState('');
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
 
+  const handleQuestionChange = (event) => {
+    setQuestion(event.target.value);
+  };
+
+  const handleQuestionSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      console.log(`Submitting question: ${question}`);
+      const response = await askQuestion(question);
+      console.log('Full API Response:', response);
+
+      // Extracting data from the response
+      let biblereferences = [];
+      let bibleverses = [];
+      let biblicalconcepts = [];
+
+      response.forEach(item => {
+        if (item.biblereferences && item.biblereferences.trim() !== "nan") {
+          biblereferences.push(item.biblereferences);
+        }
+        if (item.bibleverses && item.bibleverses.trim() !== "nan") {
+          bibleverses.push(item.bibleverses);
+        }
+        if (item.biblicalconcepts && item.biblicalconcepts.trim() !== "nan") {
+          biblicalconcepts.push(item.biblicalconcepts);
+        }
+      });
+
+      // Log the extracted data
+      console.log('Biblereferences:', biblereferences);
+      console.log('Bibleverses:', bibleverses);
+      console.log('Biblicalconcepts:', biblicalconcepts);
+
+      // Concatenate the extracted data
+      const concatenatedString = [...biblereferences, ...bibleverses, ...biblicalconcepts].join(', ');
+      console.log('Concatenated String:', concatenatedString);
+      setApiResponseString(concatenatedString);
+    } catch (error) {
+      console.error('Error fetching question data:', error);
+    }
+  };
+
   const parseReference = (reference) => {
-    // Updated regex to handle optional chapter and verse
     const match = reference.match(/^(\d?\s?[A-Za-z.]+)(?:\s(\d+))?(?::(\d+)(?:-(\d+))?(?::(\d+))?)?$/);
     if (!match) return null;
 
@@ -36,6 +79,7 @@ const Bible = () => {
     let versesList = [];
     let chaptersList = [];
     let booksList = [];
+    let verseCountMap = {};
 
     for (const ref of references) {
       const parsedRef = parseReference(ref);
@@ -47,31 +91,22 @@ const Bible = () => {
           try {
             if (parsedRef.startChapter && parsedRef.startVerse) {
               const versesData = await getVerses(bookId, parsedRef.startChapter);
-              console.log(`Fetched verses for ${parsedRef.book} ${parsedRef.startChapter}:`, versesData);
-              const selectedVerses = versesData.slice(parsedRef.startVerse - 1, parsedRef.endVerse).map(verse => verse.text).join(' ');
-              const title = parsedRef.startVerse === parsedRef.endVerse
-                ? `${parsedRef.book} ${parsedRef.startChapter}:${parsedRef.startVerse}`
-                : `${parsedRef.book} ${parsedRef.startChapter}:${parsedRef.startVerse}-${parsedRef.endVerse}`;
-              versesList.push({
-                title: title,
-                text: selectedVerses
-              });
-            } else if (parsedRef.startChapter) {
-              const versesData = await getVerses(bookId, parsedRef.startChapter);
-              console.log(`Fetched verses for ${parsedRef.book} ${parsedRef.startChapter}:`, versesData);
-              const selectedVerses = versesData.slice(0, 4).map(verse => verse.text).join(' ');
-              chaptersList.push({
-                title: `Chapter | ${parsedRef.book} ${parsedRef.startChapter}`,
-                text: selectedVerses
-              });
-            } else {
-              const versesData = await getVerses(bookId, 1);
-              console.log(`Fetched verses for ${parsedRef.book} 1:`, versesData);
-              const selectedVerses = versesData.slice(0, 4).map(verse => verse.text).join(' ');
-              booksList.push({
-                title: `Book | ${parsedRef.book}`,
-                text: selectedVerses
-              });
+
+              for (let verseNumber = parsedRef.startVerse; verseNumber <= parsedRef.endVerse; verseNumber++) {
+                const selectedVerse = versesData[verseNumber - 1];
+                if (selectedVerse) {
+                  versesList.push({
+                    title: `${parsedRef.book} ${parsedRef.startChapter}:${verseNumber}`,
+                    text: selectedVerse.text
+                  });
+
+                  const verseRef = `${parsedRef.book} ${parsedRef.startChapter}:${verseNumber}`;
+                  if (!verseCountMap[verseRef]) {
+                    verseCountMap[verseRef] = 0;
+                  }
+                  verseCountMap[verseRef]++;
+                }
+              }
             }
           } catch (error) {
             console.error(`Failed to fetch verses for ${parsedRef.book} ${parsedRef.startChapter}:`, error);
@@ -83,20 +118,28 @@ const Bible = () => {
         console.error(`Could not parse reference: ${ref}`);
       }
     }
-    console.log('Parsed References:', parsedRefs);
-    console.log('Verses:', versesList);
-    console.log('Chapters:', chaptersList);
-    console.log('Books:', booksList);
+
     setParsedInput(parsedRefs);
     setVerses(versesList);
     setChapters(chaptersList);
     setBooks(booksList);
+    setVerseCounts(verseCountMap);
   };
 
   return (
     <div className="container">
       <h1>Bible App</h1>
       <div className="input-bar">
+        <form onSubmit={handleQuestionSubmit}>
+          <input
+            type="text"
+            placeholder="Ask a question..."
+            value={question}
+            onChange={handleQuestionChange}
+            className="input"
+          />
+          <button type="submit" className="button">Ask Question</button>
+        </form>
         <form onSubmit={handleFormSubmit}>
           <input
             type="text"
@@ -124,6 +167,7 @@ const Bible = () => {
           <div key={index}>
             <strong>{verse.title}</strong>
             <p className="verse">{verse.text}</p>
+            <p>Count: {verseCounts[verse.title] || 0}</p>
           </div>
         ))}
       </div>
@@ -144,6 +188,10 @@ const Bible = () => {
             <p className="verse">{book.text}</p>
           </div>
         ))}
+      </div>
+      <div className="api-response-container">
+        <h2>API Response:</h2>
+        <p>{apiResponseString}</p>
       </div>
     </div>
   );
