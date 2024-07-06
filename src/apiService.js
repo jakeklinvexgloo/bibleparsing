@@ -55,13 +55,55 @@ export const cleanResponse = (responses) => {
   });
 
   return responses
-    .map(item => item.trim())
-    .filter(item => item !== 'NA')
-    .map(item => item.split(';').join('/')) // Replacing ";" with "/" unless between numbers
-    .map(item => {
+    .map(({ item, index }) => ({
+      item: item.trim(),
+      index
+    }))
+    .filter(({ item }) => item !== 'NA')
+    .map(({ item, index }) => ({
+      item: item.split(';').join('/'), // Replacing ";" with "/" unless between numbers
+      index
+    }))
+    .map(({ item, index }) => {
       const words = item.split(/(\d+)/).filter(Boolean);
-      return words.map(word => abbreviationMap.get(word.trim()) || word).join(' ').replace(/\s*:\s*/g, ':');
+      const cleanedItem = words.map(word => abbreviationMap.get(word.trim()) || word).join(' ').replace(/\s*:\s*/g, ':').replace(/\s*-\s*/g, '-');
+      return { item: cleanedItem, index };
     })
-    .filter(item => validBooks.some(book => item.includes(book)))
+    .filter(({ item }) => validBooks.some(book => item.includes(book)))
+    .map(({ item, index }) => `${index}: ${item}`)
+    .join(' / ');
+};
+
+export const cleanAndDedupedResponse = (responses) => {
+  const validBooks = books.map(book => book.name);
+  const abbreviationMap = new Map();
+  books.forEach(book => {
+    book.abbreviations.forEach(abbr => abbreviationMap.set(abbr, book.name));
+  });
+
+  const seen = new Map();
+  return responses
+    .map(({ item, index }) => ({
+      item: item.trim(),
+      index
+    }))
+    .filter(({ item }) => item !== 'NA')
+    .map(({ item, index }) => ({
+      item: item.split(';').join('/'), // Replacing ";" with "/" unless between numbers
+      index
+    }))
+    .map(({ item, index }) => {
+      const words = item.split(/(\d+)/).filter(Boolean);
+      const cleanedItem = words.map(word => abbreviationMap.get(word.trim()) || word).join(' ').replace(/\s*:\s*/g, ':').replace(/\s*-\s*/g, '-');
+      return { item: cleanedItem, index };
+    })
+    .filter(({ item }) => validBooks.some(book => item.includes(book)))
+    .filter(({ item, index }) => {
+      const seenKey = `${index}:${item}`;
+      if (seen.has(seenKey)) return false;
+      seen.set(seenKey, true);
+      return true;
+    })
+    .map(({ item, index }) => `${index}: ${item}`)
     .join(' / ');
 };

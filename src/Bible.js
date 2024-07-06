@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getBooks, getVerses, getBookId, askQuestion, cleanResponse } from './apiService';
+import { getBooks, getVerses, getBookId, askQuestion, cleanResponse, cleanAndDedupedResponse } from './apiService';
 import './Bible.css';
 
 const Bible = () => {
@@ -11,7 +11,8 @@ const Bible = () => {
   const [verseCounts, setVerseCounts] = useState({});
   const [question, setQuestion] = useState('');
   const [apiResponseString, setApiResponseString] = useState('');
-  const [cleanedApiResponseString, setCleanedApiResponseString] = useState('');
+  const [cleanedResponseString, setCleanedResponseString] = useState('');
+  const [cleanedAndDedupedResponseString, setCleanedAndDedupedResponseString] = useState('');
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
@@ -35,13 +36,13 @@ const Bible = () => {
 
       response.forEach(item => {
         if (item.biblereferences && item.biblereferences.trim() !== "nan") {
-          biblereferences.push(item.biblereferences);
+          biblereferences.push({ item: item.biblereferences, index: item.index });
         }
         if (item.bibleverses && item.bibleverses.trim() !== "nan") {
-          bibleverses.push(item.bibleverses);
+          bibleverses.push({ item: item.bibleverses, index: item.index });
         }
         if (item.biblicalconcepts && item.biblicalconcepts.trim() !== "nan") {
-          biblicalconcepts.push(item.biblicalconcepts);
+          biblicalconcepts.push({ item: item.biblicalconcepts, index: item.index });
         }
       });
 
@@ -51,14 +52,21 @@ const Bible = () => {
       console.log('Biblicalconcepts:', biblicalconcepts);
 
       // Concatenate the extracted data
-      const concatenatedString = [...biblereferences, ...bibleverses, ...biblicalconcepts].join(', ');
+      const concatenatedString = [...biblereferences, ...bibleverses, ...biblicalconcepts]
+        .map(({ item, index }) => `${index}: ${item}`)
+        .join(' / ');
       console.log('Concatenated String:', concatenatedString);
       setApiResponseString(concatenatedString);
 
       // Clean the concatenated string
-      const cleanedString = cleanResponse(concatenatedString.split(', '));
+      const cleanedString = cleanResponse([...biblereferences, ...bibleverses, ...biblicalconcepts]);
       console.log('Cleaned Concatenated String:', cleanedString);
-      setCleanedApiResponseString(cleanedString);
+      setCleanedResponseString(cleanedString);
+
+      // Clean and deduped the concatenated string
+      const cleanedAndDedupedString = cleanAndDedupedResponse([...biblereferences, ...bibleverses, ...biblicalconcepts]);
+      console.log('Cleaned and Deduped Concatenated String:', cleanedAndDedupedString);
+      setCleanedAndDedupedResponseString(cleanedAndDedupedString);
     } catch (error) {
       console.error('Error fetching question data:', error);
     }
@@ -200,8 +208,12 @@ const Bible = () => {
         <p>{apiResponseString}</p>
       </div>
       <div className="cleaned-response-container">
-        <h2>Cleaned API Response:</h2>
-        <p>{cleanedApiResponseString}</p>
+        <h2>Cleaned Response:</h2>
+        <p>{cleanedResponseString}</p>
+      </div>
+      <div className="cleaned-deduped-response-container">
+        <h2>Cleaned and Deduped Response:</h2>
+        <p>{cleanedAndDedupedResponseString}</p>
       </div>
     </div>
   );
