@@ -1,12 +1,12 @@
 // src/App.js
 import React from 'react';
 import './App.css';
-import Bible from './Bible';
+import BibleQueryAnalyzer from './BibleQueryAnalyzer';
 
 function App() {
   return (
     <div className="App">
-      <Bible />
+      <BibleQueryAnalyzer />
     </div>
   );
 }

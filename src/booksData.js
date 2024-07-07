@@ -18,7 +18,7 @@ export const books = [
     { name: 'Esther', id: 'esther', chapters: 10, abbreviations: ['Est.', 'Esth.', 'Es'] },
     { name: 'Job', id: 'job', chapters: 42, abbreviations: ['Job', 'Jb'] },
     { name: 'Psalms', id: 'psalms', chapters: 150, abbreviations: ['Ps.', 'Psalm', 'Pslm.', 'Psa.', 'Psm.', 'Pss.', 'Psalms'] },
-    { name: 'Proverbs', id: 'proverbs', chapters: 31, abbreviations: ['Prov', 'Pro.', 'Prv.', 'Pr', 'Proverbs'] },
+    { name: 'Proverbs', id: 'proverbs', chapters: 31, abbreviations: ['Prov', 'Prov.', 'Pro.', 'Prv.', 'Pr', 'Proverbs'] },
     { name: 'Ecclesiastes', id: 'ecclesiastes', chapters: 12, abbreviations: ['Eccles.', 'Eccle.', 'Ecc.', 'Ec.', 'Qoh.', 'Ecclesiastes'] },
     { name: 'Song of Solomon', id: 'songofsolomon', chapters: 8, abbreviations: ['Song', 'Song of Songs', 'SOS.', 'So.', 'Canticle of Canticles', 'Canticles', 'Cant.', 'Song of Solomon'] },
     { name: 'Isaiah', id: 'isaiah', chapters: 66, abbreviations: ['Isa.', 'Is', 'Isaiah'] },

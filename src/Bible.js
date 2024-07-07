@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getBooks, getVerses, getBookId, askQuestion, cleanResponse, cleanAndDedupedResponse } from './apiService';
+import { getBooks, getVerses, getBookId, askQuestion, cleanResponse, cleanAndDedupedResponse, separateVerses } from './apiService';
 import './Bible.css';
 
 const Bible = () => {
@@ -13,6 +13,8 @@ const Bible = () => {
   const [apiResponseString, setApiResponseString] = useState('');
   const [cleanedResponseString, setCleanedResponseString] = useState('');
   const [cleanedAndDedupedResponseString, setCleanedAndDedupedResponseString] = useState('');
+  const [verseCountList, setVerseCountList] = useState([]);
+  const [separatedVerseCountList, setSeparatedVerseCountList] = useState([]);
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
@@ -67,6 +69,46 @@ const Bible = () => {
       const cleanedAndDedupedString = cleanAndDedupedResponse([...biblereferences, ...bibleverses, ...biblicalconcepts]);
       console.log('Cleaned and Deduped Concatenated String:', cleanedAndDedupedString);
       setCleanedAndDedupedResponseString(cleanedAndDedupedString);
+
+      // Calculate verse counts
+      const verseCountMap = {};
+      cleanedAndDedupedString.split(' / ').forEach(verse => {
+        const verseWithoutIndex = verse.split(': ').slice(1).join(': ').trim();
+        if (verseCountMap[verseWithoutIndex]) {
+          verseCountMap[verseWithoutIndex]++;
+        } else {
+          verseCountMap[verseWithoutIndex] = 1;
+        }
+      });
+
+      // Sort verses by count
+      const verseCountArray = Object.entries(verseCountMap)
+        .map(([verse, count]) => ({ verse, count }))
+        .sort((a, b) => b.count - a.count);
+
+      setVerseCountList(verseCountArray);
+
+      // Separate verses and count each one
+      console.log('Verses before separation:', cleanedAndDedupedString.split(' / ').map(verse => verse.split(': ').slice(1).join(': ').trim()));
+      const separatedVerses = separateVerses(cleanedAndDedupedString.split(' / ').map(verse => verse.split(': ').slice(1).join(': ').trim()));
+      console.log('Separated Verses:', separatedVerses);
+
+      const separatedVerseCountMap = {};
+
+      separatedVerses.forEach(verse => {
+        if (separatedVerseCountMap[verse]) {
+          separatedVerseCountMap[verse]++;
+        } else {
+          separatedVerseCountMap[verse] = 1;
+        }
+      });
+
+      // Sort separated verses by count
+      const separatedVerseCountArray = Object.entries(separatedVerseCountMap)
+        .map(([verse, count]) => ({ verse, count }))
+        .sort((a, b) => b.count - a.count);
+
+      setSeparatedVerseCountList(separatedVerseCountArray);
     } catch (error) {
       console.error('Error fetching question data:', error);
     }
@@ -214,6 +256,22 @@ const Bible = () => {
       <div className="cleaned-deduped-response-container">
         <h2>Cleaned and Deduped Response:</h2>
         <p>{cleanedAndDedupedResponseString}</p>
+      </div>
+      <div className="verse-count-container">
+        <h2>Verse Count:</h2>
+        <ul>
+          {verseCountList.map(({ verse, count }, index) => (
+            <li key={index}>{verse}: {count}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="separated-verse-count-container">
+        <h2>Separated Verse Count:</h2>
+        <ul>
+          {separatedVerseCountList.map(({ verse, count }, index) => (
+            <li key={index}>{verse}: {count}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );

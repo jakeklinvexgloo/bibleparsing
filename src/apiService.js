@@ -107,3 +107,31 @@ export const cleanAndDedupedResponse = (responses) => {
     .map(({ item, index }) => `${index}: ${item}`)
     .join(' / ');
 };
+
+export const separateVerses = (verses) => {
+  const separated = [];
+
+  verses.forEach(verse => {
+    console.log('Processing verse:', verse);
+    const [index, ref] = verse.split(': ');
+    if (!ref) return;
+
+    const [book, chapterVerses] = ref.split(' ');
+    const chapterVersesList = chapterVerses.split(/[,;]/).map(cv => cv.trim());
+
+    chapterVersesList.forEach(chapterVerse => {
+      if (chapterVerse.includes('-')) {
+        const [start, end] = chapterVerse.split('-').map(Number);
+        const chapter = book.split(' ')[1];
+        for (let i = start; i <= end; i++) {
+          separated.push(`${book} ${chapter}:${i}`);
+        }
+      } else {
+        separated.push(`${book} ${chapterVerse}`);
+      }
+    });
+  });
+
+  console.log('Separated verses:', separated);
+  return separated;
+};
