@@ -1,0 +1,173 @@
+.bible-query-analyzer {
+    font-family: 'Arial', sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f7fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .query-form {
+    display: flex;
+    margin-bottom: 30px;
+  }
+  
+  .query-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #3498db;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+  }
+  
+  .submit-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .section-title {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-top: 30px;
+  }
+  
+  .verse-counts {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .verse-count-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: white;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .verse {
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  
+  .count {
+    background-color: #3498db;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  
+  .top-verses-container {
+    margin-top: 30px;
+  }
+  
+  .verse-item {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .verse-reference {
+    color: #2c3e50;
+    margin-bottom: 15px;
+  }
+  
+  .mention-count {
+    font-size: 0.8em;
+    color: #7f8c8d;
+  }
+  
+  .verse-content {
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  
+  .verse-number {
+    color: #3498db;
+  }
+  
+  .parsed-references-container {
+    margin-top: 30px;
+  }
+  
+  .parsed-references-list {
+    list-style-type: none;
+    padding: 0;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .parsed-reference-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ecf0f1;
+  }
+  
+  .parsed-reference-item:last-child {
+    border-bottom: none;
+  }
+  
+  .raw-responses-container {
+    margin-top: 30px;
+  }
+  
+  .raw-responses {
+    background-color: white;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  
+  @media (max-width: 600px) {
+    .query-form {
+      flex-direction: column;
+    }
+  
+    .query-input,
+    .submit-button {
+      width: 100%;
+      border-radius: 4px;
+    }
+  
+    .submit-button {
+      margin-top: 10px;
+    }
+  }
