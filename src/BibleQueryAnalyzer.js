@@ -220,7 +220,14 @@ const BibleQueryAnalyzer = () => {
     let results = [];
     let processedVerses = new Set();
   
-    while (results.length < 5 && topVerses.length > 0) {
+    while (results.length < 5 && (topVerses.length > 0 || sortedVerses.length > 0)) {
+      if (topVerses.length === 0) {
+        // Add the next highest verse that hasn't been processed
+        const nextVerse = sortedVerses.find(([v]) => !processedVerses.has(v));
+        if (nextVerse) topVerses.push(nextVerse);
+        else break;
+      }
+  
       const [verse, count] = topVerses.shift();
       if (processedVerses.has(verse)) continue;
   
@@ -277,12 +284,10 @@ const BibleQueryAnalyzer = () => {
       }
   
       processedVerses.add(verse);
-  
-      // If we've processed all top 5 but still need more results, add the next highest
-      if (results.length < 5 && topVerses.length === 0) {
-        topVerses = sortedVerses.slice(5).filter(([v]) => !processedVerses.has(v));
-      }
     }
+  
+    // Sort the final results based on the combined counts
+    results.sort((a, b) => b.count - a.count);
   
     console.log('Final top verses with content:', JSON.stringify(results, null, 2));
     return results;
