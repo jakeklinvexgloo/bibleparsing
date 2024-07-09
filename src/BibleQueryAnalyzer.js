@@ -91,28 +91,38 @@ const BibleQueryAnalyzer = () => {
         console.log(`Parsed single reference: ${raw} -> ${parsed}`);
         return [{ raw, parsed, field }];
       }
-
+  
       const [start, end] = parts;
       const [book, startChapter, startVerse] = splitBookChapterVerse(start.trim());
       const [, endChapter, endVerse] = splitBookChapterVerse(end.trim());
-
-      if (!book || !startChapter) {
+  
+      if (!book) {
         console.error('Invalid reference:', raw);
         return [];
       }
-
-      if (!endVerse) {
+  
+      if (!endVerse && !endChapter) {
         const parsed = standardizeBookName(start.trim());
-        console.log(`Parsed range reference without end verse: ${raw} -> ${parsed}`);
+        console.log(`Parsed range reference without end: ${raw} -> ${parsed}`);
         return [{ raw, parsed, field }];
       }
-
+  
       const fullBookName = getFullBookName(book);
       const result = [];
-      for (let verse = parseInt(startVerse || 1); verse <= parseInt(endVerse || startVerse || 1); verse++) {
-        const parsed = `${fullBookName} ${startChapter}:${verse}`;
+      const startVerseNum = startVerse ? parseInt(startVerse) : 1;
+      const endVerseNum = endVerse ? parseInt(endVerse) : (startVerse ? startVerseNum : null);
+  
+      if (endVerseNum !== null) {
+        for (let verse = startVerseNum; verse <= endVerseNum; verse++) {
+          const parsed = `${fullBookName} ${startChapter}:${verse}`;
+          result.push({ raw, parsed, field });
+        }
+      } else {
+        // If no verse range, just use the standardized book and chapter
+        const parsed = `${fullBookName} ${startChapter}`;
         result.push({ raw, parsed, field });
       }
+  
       console.log(`Parsed range reference: ${raw} -> ${JSON.stringify(result, null, 2)}`);
       return result;
     });
@@ -124,10 +134,10 @@ const BibleQueryAnalyzer = () => {
       console.error('Invalid reference:', reference);
       return ['', '', ''];
     }
-
+  
     const parts = reference.trim().split(' ');
     let book, chapter, verse;
-
+  
     if (parts.length >= 3 && (parts[0] === '1' || parts[0] === '2' || parts[0] === '3')) {
       book = `${parts[0]} ${parts[1]}`;
       [chapter, verse] = parts.slice(2).join(' ').split(':');
@@ -139,16 +149,18 @@ const BibleQueryAnalyzer = () => {
       chapter = '';
       verse = '';
     }
-
-    // If verse is not defined but chapter contains a number, treat it as the verse
-    if (!verse && chapter && !isNaN(parseInt(chapter))) {
-      verse = chapter;
-      chapter = '1';  // Default to chapter 1 if not specified
+  
+    // Don't treat chapter as verse if verse is not specified
+    if (!verse && chapter) {
+      // Keep chapter as is, don't convert to verse
+      verse = '';
     }
-
+  
     console.log('Split result:', { book, chapter, verse });
     return [book, chapter || '', verse || ''];
   };
+  
+
 
   const standardizeBookName = (reference) => {
     console.log('Standardizing book name:', reference);
