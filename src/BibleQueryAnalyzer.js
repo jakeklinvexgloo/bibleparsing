@@ -215,33 +215,54 @@ const BibleQueryAnalyzer = () => {
     console.log('Getting top 5 verses with content. Verse counts:', JSON.stringify(verseCounts, null, 2));
     const sortedVerses = Object.entries(verseCounts)
       .sort(([, a], [, b]) => b - a);
-
-    const results = [];
-    let index = 0;
-    while (results.length < 5 && index < sortedVerses.length) {
-      const [verse, count] = sortedVerses[index];
+  
+    let topVerses = sortedVerses.slice(0, 5);
+    let results = [];
+    let processedVerses = new Set();
+  
+    while (results.length < 5 && topVerses.length > 0) {
+      const [verse, count] = topVerses.shift();
+      if (processedVerses.has(verse)) continue;
+  
       const [book, chapter, verseNumber] = splitBookChapterVerse(verse);
-      
-      if (!verseNumber) {
-        console.log('Skipping reference without verse number:', verse);
-        index++;
-        continue;
+      let startVerse = parseInt(verseNumber);
+      let endVerse = startVerse;
+      let totalCount = count;
+  
+      // Look for nearby verses only within the current top 5 and within 4 verses
+      for (let i = 0; i < topVerses.length; i++) {
+        const [nearbyVerse, nearbyCount] = topVerses[i];
+        const [nearbyBook, nearbyChapter, nearbyVerseNumber] = splitBookChapterVerse(nearbyVerse);
+        
+        if (nearbyBook === book && nearbyChapter === chapter) {
+          const nearbyVerseNum = parseInt(nearbyVerseNumber);
+          if (Math.abs(nearbyVerseNum - startVerse) <= 4 || Math.abs(nearbyVerseNum - endVerse) <= 4) {
+            startVerse = Math.min(startVerse, nearbyVerseNum);
+            endVerse = Math.max(endVerse, nearbyVerseNum);
+            totalCount += nearbyCount;
+            processedVerses.add(nearbyVerse);
+            topVerses.splice(i, 1);
+            i--;
+          }
+        }
       }
-
-      const startVerse = parseInt(verseNumber);
-      const endVerse = startVerse + 3;
-      
-      const reference = `${book} ${chapter}:${startVerse}-${endVerse}`;
+  
+      // Extend the range to include up to 3 verses after
+      const extendedEndVerse = endVerse + 3;
+  
+      const reference = `${book} ${chapter}:${startVerse}-${extendedEndVerse}`;
       console.log('Fetching verses for reference:', reference);
-      
+  
       try {
         const verses = await fetchVerses(reference);
         console.log('Fetched verses:', JSON.stringify(verses, null, 2));
         if (verses && verses.length > 0) {
           const { abbreviation, number } = getBookAbbreviation(book);
+          const actualStartVerse = verses[0].verse;
+          const actualEndVerse = verses[verses.length - 1].verse;
           results.push({ 
-            reference, 
-            count, 
+            reference: `${book} ${chapter}:${actualStartVerse}-${actualEndVerse}`,
+            count: totalCount, 
             verses,
             book: {
               full: book,
@@ -254,11 +275,16 @@ const BibleQueryAnalyzer = () => {
       } catch (error) {
         console.error(`Error fetching verses for ${reference}:`, error);
       }
-      
-      index++;
+  
+      processedVerses.add(verse);
+  
+      // If we've processed all top 5 but still need more results, add the next highest
+      if (results.length < 5 && topVerses.length === 0) {
+        topVerses = sortedVerses.slice(5).filter(([v]) => !processedVerses.has(v));
+      }
     }
-
-    console.log('Final top 5 verses with content:', JSON.stringify(results, null, 2));
+  
+    console.log('Final top verses with content:', JSON.stringify(results, null, 2));
     return results;
   };
 
